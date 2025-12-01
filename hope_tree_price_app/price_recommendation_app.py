@@ -191,11 +191,6 @@ def main():
         f"{input_price:.2f}",
         help="你输入的罐单价"
     )
-    col3.metric(
-        "模型推荐罐单价（元）",
-        f"{recommended_price:.2f}",
-        help=f"计算逻辑：RSP*(1-最优折扣率) = {fixed_rsp:.2f}*(1-{model_info['optimal_discount']:.2%})"
-    )
     col4.metric(
         "预测销量（件）",
         f"{predict_result['pred_sales']}",
@@ -251,4 +246,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
