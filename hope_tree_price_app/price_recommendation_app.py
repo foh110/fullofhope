@@ -198,7 +198,7 @@ def main():
     )
 
     # 3. 新增“预测退款率”+“预估毛利”展示
-    col4, col5 = st.columns(2)
+    col5, col6 = st.columns(2)
     col5.metric(
         "预测退款率",
         f"{predict_result['pred_returns']:.2%}",
@@ -246,6 +246,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
