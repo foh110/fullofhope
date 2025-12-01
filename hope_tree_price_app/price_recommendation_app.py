@@ -70,9 +70,12 @@ def predict_by_model(model_info, calculated_discount):
 
 # -------------------------- 4. 可视化图表（不变） --------------------------
 def plot_discount_impact(model_info, calculated_discount):
-        # 强制刷新字体配置（确保中文生效）
-    plt.rcParams['font.sans-serif'] = ['WenQuanYi Zen Hei', 'DejaVu Sans', 'SimHei', 'Microsoft YaHei']
+    # 🔥 关键修复：Linux专属中文字体配置（只保留系统预装字体）
+    plt.rcParams['font.sans-serif'] = ['WenQuanYi Zen Hei', 'Noto Sans CJK SC', 'DejaVu Sans']
     plt.rcParams['axes.unicode_minus'] = False
+    # 额外添加：禁用字体缓存（避免旧配置残留）
+    plt.rcParams['font.family'] = 'sans-serif'  # 强制使用无衬线字体族
+
     gam_sales = model_info['gam_sales']
     gam_returns = model_info['gam_returns']
     discount_range = np.linspace(model_info['discount_min'], model_info['discount_max'], 200)
@@ -88,24 +91,29 @@ def plot_discount_impact(model_info, calculated_discount):
     ax1.plot(discount_range, pred_sales, color=color_sales, linewidth=2, label='销量预测')
     ax1.scatter(optimal_discount, optimal_sales, color=color_sales, s=100, zorder=5, label=f'模型最优折扣点({optimal_discount:.2%})')
     ax1.scatter(calculated_discount, predict_by_model(model_info, calculated_discount)['pred_sales'], color='red', s=100, zorder=5, label=f'公式计算折扣点({calculated_discount:.2%})')
-    ax1.set_xlabel('折扣率', fontsize=12, fontweight='bold')
-    ax1.set_ylabel('预测销量（件）', color=color_sales, fontsize=12, fontweight='bold')
+    
+    # 🔥 额外修复：单独设置坐标轴标签字体（避免加粗中文失效）
+    ax1.set_xlabel('折扣率', fontsize=12, fontweight='normal')  # Linux中文字体加粗可能失效，改为normal
+    ax1.set_ylabel('预测销量（件）', color=color_sales, fontsize=12, fontweight='normal')
     ax1.tick_params(axis='y', labelcolor=color_sales)
     ax1.grid(alpha=0.3)
+    
     # 退款率轴
     ax2 = ax1.twinx()
     color_returns = '#A23B72'
     ax2.plot(discount_range, pred_returns, color=color_returns, linewidth=2, linestyle='--', label='退款率预测')
     ax2.scatter(optimal_discount, optimal_returns, color=color_returns, s=100, zorder=5)
     ax2.scatter(calculated_discount, predict_by_model(model_info, calculated_discount)['pred_returns'], color='red', s=100, zorder=5)
-    ax2.set_ylabel('预测退款率', color=color_returns, fontsize=12, fontweight='bold')
+    ax2.set_ylabel('预测退款率', color=color_returns, fontsize=12, fontweight='normal')
     ax2.tick_params(axis='y', labelcolor=color_returns)
+    
     # 图例
     lines1, labels1 = ax1.get_legend_handles_labels()
     lines2, labels2 = ax2.get_legend_handles_labels()
     ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper left', fontsize=10)
-    # 标题
-    plt.title(f'折扣率对销量和退款率的影响（店铺固定RSP：{model_info["fixed_rsp"]:.2f}元）', fontsize=14, fontweight='bold', pad=15)
+    
+    # 标题（同样取消加粗，确保中文显示）
+    plt.title(f'折扣率对销量和退款率的影响（店铺固定RSP：{model_info["fixed_rsp"]:.2f}元）', fontsize=14, fontweight='normal', pad=15)
     return fig
 
 # -------------------------- 5. 网页主界面（仅更新文本说明） --------------------------
@@ -243,3 +251,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
