@@ -70,22 +70,9 @@ def predict_by_model(model_info, calculated_discount):
 
 # -------------------------- 4. 可视化图表（不变） --------------------------
 def plot_discount_impact(model_info, calculated_discount):
-    # 🔥 Linux 网页版专属：只保留服务器预装中文字体（优先级从高到低）
-    plt.rcParams['font.sans-serif'] = [
-        'WenQuanYi Zen Hei',  # Streamlit Cloud 预装
-        'Noto Sans CJK SC',   # 主流 Linux 必装中文字体
-        'DejaVu Sans'         # 兜底英文无衬线字体（避免全乱码）
-    ]
-    plt.rcParams['axes.unicode_minus'] = False  # 解决负号显示
-    plt.rcParams['font.family'] = 'sans-serif'  # 强制无衬线字体族
-    plt.rcParams['font.size'] = 10  # 统一字体大小，避免显示异常
-
-    # 🔥 新增：字体验证（网页控制台可查看是否找到中文字体）
-    from matplotlib.font_manager import FontManager
-    fm = FontManager()
-    available_fonts = set(f.name for f in fm.ttflist)
-    chinese_fonts = [f for f in plt.rcParams['font.sans-serif'] if f in available_fonts]
-    st.write(f"Linux 服务器可用中文字体：{chinese_fonts}")  # 网页中显示可用字体
+    # 仅用支持英文的字体，避免乱码
+    plt.rcParams['font.sans-serif'] = ['DejaVu Sans']
+    plt.rcParams['axes.unicode_minus'] = False
 
     gam_sales = model_info['gam_sales']
     gam_returns = model_info['gam_returns']
@@ -97,25 +84,23 @@ def plot_discount_impact(model_info, calculated_discount):
     optimal_returns = max(gam_returns.predict([[optimal_discount]])[0], 0)
 
     fig, ax1 = plt.subplots(figsize=(10, 6))
-    # 销量轴
+    # 销量轴（英文标签）
     color_sales = '#2E86AB'
-    ax1.plot(discount_range, pred_sales, color=color_sales, linewidth=2, label='销量预测')
-    ax1.scatter(optimal_discount, optimal_sales, color=color_sales, s=100, zorder=5, label=f'模型最优折扣点({optimal_discount:.2%})')
-    ax1.scatter(calculated_discount, predict_by_model(model_info, calculated_discount)['pred_sales'], color='red', s=100, zorder=5, label=f'公式计算折扣点({calculated_discount:.2%})')
-    
-    # Linux 中文字体加粗可能失效，用 normal 更稳定
-    ax1.set_xlabel('折扣率', fontsize=12, fontweight='normal')
-    ax1.set_ylabel('预测销量（件）', color=color_sales, fontsize=12, fontweight='normal')
+    ax1.plot(discount_range, pred_sales, color=color_sales, linewidth=2, label='Sales Prediction')
+    ax1.scatter(optimal_discount, optimal_sales, color=color_sales, s=100, zorder=5, label=f'Model Optimal Discount ({optimal_discount:.2%})')
+    ax1.scatter(calculated_discount, predict_by_model(model_info, calculated_discount)['pred_sales'], color='red', s=100, zorder=5, label=f'Formula Calculated Discount ({calculated_discount:.2%})')
+    ax1.set_xlabel('Discount Rate', fontsize=12, fontweight='bold')
+    ax1.set_ylabel('Predicted Sales (Units)', color=color_sales, fontsize=12, fontweight='bold')
     ax1.tick_params(axis='y', labelcolor=color_sales)
     ax1.grid(alpha=0.3)
     
-    # 退款率轴
+    # 退款率轴（英文标签）
     ax2 = ax1.twinx()
     color_returns = '#A23B72'
-    ax2.plot(discount_range, pred_returns, color=color_returns, linewidth=2, linestyle='--', label='退款率预测')
+    ax2.plot(discount_range, pred_returns, color=color_returns, linewidth=2, linestyle='--', label='Return Rate Prediction')
     ax2.scatter(optimal_discount, optimal_returns, color=color_returns, s=100, zorder=5)
     ax2.scatter(calculated_discount, predict_by_model(model_info, calculated_discount)['pred_returns'], color='red', s=100, zorder=5)
-    ax2.set_ylabel('预测退款率', color=color_returns, fontsize=12, fontweight='normal')
+    ax2.set_ylabel('Predicted Return Rate', color=color_returns, fontsize=12, fontweight='bold')
     ax2.tick_params(axis='y', labelcolor=color_returns)
     
     # 图例
@@ -123,8 +108,8 @@ def plot_discount_impact(model_info, calculated_discount):
     lines2, labels2 = ax2.get_legend_handles_labels()
     ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper left', fontsize=10)
     
-    # 标题用 normal 权重
-    plt.title(f'折扣率对销量和退款率的影响（店铺固定RSP：{model_info["fixed_rsp"]:.2f}元）', fontsize=14, fontweight='normal', pad=15)
+    # 标题（英文）
+    plt.title(f'Impact of Discount Rate on Sales & Return Rate (Fixed RSP: {model_info["fixed_rsp"]:.2f} Yuan)', fontsize=14, fontweight='bold', pad=15)
     return fig
 
 # -------------------------- 5. 网页主界面（仅更新文本说明） --------------------------
@@ -257,6 +242,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
